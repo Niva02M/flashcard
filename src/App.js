@@ -1,59 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Flashcardlist from './flashcardlist';
 import './app.css'
 import axios from 'axios'
 
 function App(){
-  const[flashcards, setflashcards]=useState(SAMPLE_FLASHCARDS)
+ const[flashcards, setflashcards]=useState(SAMPLE_FLASHCARDS)
   
   useEffect(()=> {
     axios
       .get('https://opentdb.com/api.php?amount=10')
       .then(res =>{
-        res.data.results.map
-        console.log(res.data)
+        setflashcards(res.data.results.map((questionItem, index) => {
+          const answer = decodeString(questionItem.correct_answer)
+          const options=[
+            ...questionItem.incorrect_answers.map(a => decodeString(a)
+            ), 
+            answer]
+          return{
+            id:`${index}=${Date.now()}`,
+            question: decodeString(questionItem.question),
+            answer: answer,
+            options: options.sort(() => Math.random() - .5)
+          }
+        }))
       })
     }, [])
-  
+  function decodeString(str){
+    const textArea = document.createElement('textarea')
+    textArea.innerHTML= str
+    return textArea.value
+  }
+
+
+
   return(
+    <div className="container">
   <Flashcardlist flashcards={flashcards}/>
+  </div>
   );
 }
 
 const SAMPLE_FLASHCARDS=[
+
   {
     id:1,
-    question:'What is 2+2?',
-    answer:'4',
+    question:'Whenw was the movie "dead poets society" released?',
+    answer:'1989',
     options:[
-      '2',
-      '3',
-      '4',
-      '5'
+      '1982',
+      '1999',
+      '1984',
+      '2001'
     ]
   },
-  {
-    id:1,
-    question:'What is 2/2?',
-    answer:'1',
-    options:[
-      '2',
-      '3',
-      '4',
-      '1'
-    ]
-  },
-  {
-    id:1,
-    question:'What is 2+1?',
-    answer:'3',
-    options:[
-      '2',
-      '3',
-      '4',
-      '5'
-    ]
-  }
 ]
 
 export default App;
